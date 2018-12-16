@@ -1,0 +1,121 @@
+#include "stdafx.h"
+#include <string>
+#include <iostream>
+#include <conio.h>
+
+using namespace std;
+
+/* базовый тип списка */
+typedef struct _baseType {
+
+	char fname[20]; //фамилия и инициалы 	
+	char group[20]; //группа	
+	int bal[5]; //оценки		
+
+} baseType;
+
+/* структура узла списка */
+typedef struct _Node {
+
+	baseType field; // поле данных
+	struct _Node *next; // указатель на следующий элемент
+	struct _Node *prev; // указатель на предыдущий элемент
+
+} Node;
+
+/* структура двусвязного списка */
+typedef struct _dblList {
+	int size; //количество элементов списка
+	Node *head; //указатель на начало списка
+	Node *tail; //указатель на конец списка
+} dblList;
+
+/* ввод данных */
+baseType inputItem() {	
+	baseType x;	
+	printf("\nВВЕДИТЕ:\n");
+	fflush(stdin); //очищаем буфер ввода
+	printf("ФИО: "); gets_s(x.fname);
+	fflush(stdin);
+	printf("ГРУППА: "); gets_s(x.group);	
+	printf("ОЦЕНКА ПО МАТЕМАТИКЕ: "); scanf_s("%i", &x.bal[0]);
+	printf("ОЦЕНКА ПО АНГЛИЙСКОМУ: "); scanf_s("%i", &x.bal[1]);
+	printf("ОЦЕНКА ПО ПРОГРАММИРОВАНИЮ: "); scanf_s("%i", &x.bal[2]);
+	printf("ОЦЕНКА ПО ФИЗИКЕ: "); scanf_s("%i", &x.bal[3]);
+	printf("ОЦЕНКА ПО ЛИТЕРАТУРЕ: "); scanf_s("%i", &x.bal[4]);
+	return x;
+}
+
+class STUDENT
+{
+private:
+	dblList *list;	
+public:
+	STUDENT(); /* конструктор поумолчанию */
+	//STUDENT(string, int); /* конструктор класса с параметрами */
+	Node* getNode(char *surname); /* поиск позиции в списке по фамилии */	
+	void insFnNode(baseType value); /* вставка узла в конец списка */	
+	void deleteNode(char *value); /* удаление элемента из списка */			
+	void printList(); /* вывод элементов списка */
+	void printTit();  /* вывод шапки таблицы */
+	void printItem(baseType x); /* Вывод единицы данных */
+	int getSize() { return list->size; }; /* Получение количества элементов списка */	
+	void editNode(Node *elm); /* корректировка записи */
+	int printVerList();  /* вывод фамилий и номеров групп для всех студентов, имеющих оценки 4 и 5 */
+};
+
+STUDENT::STUDENT() {	
+	list = (dblList*) malloc (sizeof(dblList)); //выделение памяти под корень списка
+	list->size = 0;
+	list->head = list->tail = NULL; // пустой указатель на начало и конец списка		
+}
+
+/* поиск позиции в списке по фамилии */
+Node* STUDENT::getNode(char *surname) {
+
+	Node *tmp = list->head;
+
+	while (tmp && strcmp(tmp->field.fname, surname) != 0) {
+		tmp = tmp->next;
+	}
+
+	return tmp;
+}
+
+/* вставка узла в конец списка */
+void STUDENT::insFnNode(baseType value) {
+	Node *tmp = (Node*)malloc(sizeof(Node));
+	tmp->field = value;
+	tmp->prev = list->tail;
+	tmp->next = NULL;
+	if (list->tail) list->tail->next = tmp;
+	list->tail = tmp;
+	if (!list->head) list->head = list->tail;
+	list->size++;
+}
+
+/* удаление элемента из списка */
+void STUDENT::deleteNode(char *value) {
+
+	Node *elm = NULL;
+	elm = getNode(value);
+	while (elm != NULL) {
+		if (elm->next) {
+			elm->next->prev = elm->prev;
+		}
+		if (elm->prev) {
+			elm->prev->next = elm->next;
+		}
+		if (!elm->prev) {
+			list->head = elm->next;
+		}
+		if (!elm->next) {
+			list->tail = elm->prev;
+		}
+
+		free(elm);
+
+		list->size--;
+		elm = getNode(value);
+	}
+}
